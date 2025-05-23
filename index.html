@@ -21,6 +21,39 @@
       height: 360
     });
   </script>
+<script>
+  let deferredPrompt;
+  const installPopup = document.getElementById('install-popup');
+  const installBtn = document.getElementById('install-btn');
+  const closeBtn = document.getElementById('close-popup');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Evita que o navegador mostre automaticamente o banner de instalação
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Mostra o popup personalizado
+    if (installPopup) installPopup.style.display = 'flex';
+
+    installBtn.addEventListener('click', () => {
+      installPopup.style.display = 'none';
+      deferredPrompt.prompt();
+
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuário aceitou instalar');
+        } else {
+          console.log('Usuário recusou instalar');
+        }
+        deferredPrompt = null;
+      });
+    });
+
+    closeBtn.addEventListener('click', () => {
+      installPopup.style.display = 'none';
+    });
+  });
+</script>
   
 <script>
   if ('serviceWorker' in navigator) {
