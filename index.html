@@ -1,80 +1,68 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PWA de Streaming</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#0056b3">
-  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PWA Streaming</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <meta name="theme-color" content="#000000" />
 </head>
 <body>
-  <h1>Meu PWA de Streaming</h1>
+  <h1>Bem-vindo ao Streaming PWA</h1>
   <div id="player"></div>
 
+  <!-- Popup de instalação -->
+  <div id="install-popup" class="install-popup">
+    <div class="popup-box">
+      <h3>Instale nosso app</h3>
+      <p>Para ter acesso rápido, instale o app na sua tela inicial.</p>
+      <button id="install-btn">Instalar</button>
+      <button id="close-popup">Fechar</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
   <script>
-    var player = new Clappr.Player({
+    const player = new Clappr.Player({
       source: "https://embedmaxtv.online/animalplanet/index.m3u8",
       parentId: "#player",
       width: "100%",
-      height: 360
+      height: 360,
     });
   </script>
-<script>
-  let deferredPrompt;
-  const installPopup = document.getElementById('install-popup');
-  const installBtn = document.getElementById('install-btn');
-  const closeBtn = document.getElementById('close-popup');
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Evita que o navegador mostre automaticamente o banner de instalação
-    e.preventDefault();
-    deferredPrompt = e;
+  <script>
+    // Registro do service worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js');
+      });
+    }
 
-    // Mostra o popup personalizado
-    if (installPopup) installPopup.style.display = 'flex';
+    // Popup de instalação PWA
+    let deferredPrompt;
+    const installPopup = document.getElementById('install-popup');
+    const installBtn = document.getElementById('install-btn');
+    const closeBtn = document.getElementById('close-popup');
 
-    installBtn.addEventListener('click', () => {
-      installPopup.style.display = 'none';
-      deferredPrompt.prompt();
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPopup.style.display = 'flex';
 
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('Usuário aceitou instalar');
-        } else {
-          console.log('Usuário recusou instalar');
-        }
-        deferredPrompt = null;
+      installBtn.addEventListener('click', () => {
+        installPopup.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          deferredPrompt = null;
+        });
+      });
+
+      closeBtn.addEventListener('click', () => {
+        installPopup.style.display = 'none';
       });
     });
-
-    closeBtn.addEventListener('click', () => {
-      installPopup.style.display = 'none';
-    });
-  });
-</script>
-  
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(function (registration) {
-          console.log('ServiceWorker registrado com sucesso:', registration.scope);
-        }, function (err) {
-          console.log('Falha ao registrar o ServiceWorker:', err);
-        });
-    });
-  }
-</script>
-<div id="install-popup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:9999;">
-  <div style="background:white; padding:20px; border-radius:10px; text-align:center; max-width:300px;">
-    <h3>Instale nosso app</h3>
-    <p>Para ter acesso rápido, instale o app na sua tela inicial.</p>
-    <button id="install-btn" style="margin-right:10px; padding:10px 15px;">Instalar</button>
-    <button id="close-popup" style="padding:10px 15px;">Fechar</button>
-  </div>
-</div>
-  
+  </script>
 </body>
 </html>
